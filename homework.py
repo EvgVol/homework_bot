@@ -44,8 +44,8 @@ def send_message(bot, message):
     try:
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
         logger.info(
-            f'Пользователю @{UsrInfo}'
-             'отправлено сообщение: {message}')
+            f'Пользователю @{UsrInfo} отправлено сообщение: {message}'
+        )
     except telegram.error.TelegramError:
         logger.error(f'Сообщение: {message} не удалось отправить')
 
@@ -118,7 +118,7 @@ def check_tokens():
         return True
     else:
         logger.critical(
-            f'Отсутствует обязательная переменная окружения'
+            'Отсутствует обязательная переменная окружения'
         )
         return False
 
@@ -141,8 +141,8 @@ def main():
             else:
                 logger.info('Изменений нет')
             time.sleep(RETRY_TIME)
-        except Exception as error:
-            message = f'Сбой в работе программы: {error}'
+        except Exception as errors:
+            message = f'Сбой в работе программы: {errors}'
             if errors:
                 errors = False
                 send_message(bot, message)
