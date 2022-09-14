@@ -17,9 +17,7 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 RETRY_TIME = 600
-ENDPOINT = (
-    'https://practicum.yandex.ru/api/user_api/homework_statuses/'
-)
+ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
 HOMEWORK_STATUSES = {
@@ -47,13 +45,13 @@ def send_message(bot, message):
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
         logger.info(
             f'Пользователю @{UsrInfo}'
-            'отправлено сообщение: {message}')
+             'отправлено сообщение: {message}')
     except telegram.error.TelegramError:
         logger.error(f'Сообщение: {message} не удалось отправить')
 
 
 def get_api_answer(current_timestamp):
-    """Функция делает запрос к ЭНДПОИНТУ."""
+    """Функция делает запрос к единственному эндпоинту."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
 
@@ -95,7 +93,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """Функция извлекает статус домашней работы."""
+    """Функция извлекает cтатус домашней работы."""
     if 'homework_name' not in homework:
         raise KeyError(
             'Отсутствует ключ "homework_name" в ответе API'
@@ -107,27 +105,26 @@ def parse_status(homework):
     homework_status = homework.get('status')
     if homework_status not in HOMEWORK_STATUSES:
         raise Exception(
-            f'Неизвестный статус работы: {homework_status}'
-        )
+            f'Неизвестный статус работы: {homework_status}')
     verdict = HOMEWORK_STATUSES[homework_status]
     return (
-        f'Изменился статус работы "{homework_name}".{verdict}'
+        f'Изменился статус проверки работы "{homework_name}".{verdict}'
     )
 
 
 def check_tokens():
-    """Функция проверяет доступность переменных окружения."""
+    """Функция проверяет переменные окружения."""
     if all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]):
         return True
     else:
         logger.critical(
-            'Отсутствует обязательная переменная окружения'
+            f'Отсутствует обязательная переменная окружения'
         )
         return False
 
 
 def main():
-    """Функция описывает основную логику работы бота."""
+    """Описание основной логики работы бота."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     STATUS = ''
@@ -143,10 +140,9 @@ def main():
                 STATUS = message
             else:
                 logger.info('Изменений нет')
-
             time.sleep(RETRY_TIME)
-        except Exception as errors:
-            message = f'Сбой в работе программы: {errors}'
+        except Exception as error:
+            message = f'Сбой в работе программы: {error}'
             if errors:
                 errors = False
                 send_message(bot, message)
