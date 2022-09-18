@@ -31,3 +31,15 @@ class SendMessageException(Exception):
     """Исключения отправки сообщения в Telegram."""
 
     pass
+
+
+class EmptyValuesFromAPI(Exception):
+    """Исключение пустой ответ от API."""
+
+    pass
+
+
+class NoCorrectCodeRequest(Exception):
+    """Исключение не верный код ответа."""
+
+    pass
