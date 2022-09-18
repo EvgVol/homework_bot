@@ -20,8 +20,8 @@ TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 RETRY_TIME = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-FILE_LOG = os.path.join(BASE_DIR, "bot.log")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 VERDICTS = {
     'approved': 'Работа проверена: ревьюеру всё понравилось. Ура!',
     'reviewing': 'Работа взята на проверку ревьюером.',
@@ -187,7 +187,7 @@ if __name__ == '__main__':
         ),
         handlers=[
             logging.StreamHandler(stream=sys.stdout),
-            logging.FileHandler(filename=__file__ + '.log')
+            logging.FileHandler(f'{BASE_DIR}/outlook.log')
         ]
     )
     main()
