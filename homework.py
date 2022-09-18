@@ -165,9 +165,9 @@ def main():
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logging.error(message)
-            current_report = {
-                error.__class__.__name__: str(error)
-            }
+            # current_report = {
+            #     error.__class__.__name__: str(error)
+            # }
             if current_report != prev_report:
                 send_message(bot, message)
                 prev_report = current_report.copy()
