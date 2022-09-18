@@ -51,7 +51,7 @@ def get_api_answer(current_timestamp):
     """Функция делает запрос к единственному эндпоинту."""
     timestamp = current_timestamp
     api_with_homework = {
-        'url':ENDPOINT,
+        'url': ENDPOINT,
         'headers': HEADERS,
         'params': {'from_date': timestamp}
     }
@@ -63,8 +63,8 @@ def get_api_answer(current_timestamp):
             logging.error(f'Ошибка {response.status_code}')
             raise exceptions.NoCorrectCodeRequest(
                 f'Ошибка: {response.status_code}, '
-                 'причина: {response.reason}, '
-                 'текст: {response.text}'
+                f'причина: {response.reason}, '
+                f'текст: {response.text}'
             )
         return response.json()
     except Exception as error:
@@ -153,14 +153,14 @@ def main():
             homeworks = check_response(response)
             current_report = homeworks[0].get('status')
             if current_report != prev_report:
-                prev_report = current_report.copy() 
+                prev_report = current_report.copy()
                 message = parse_status(homeworks[0])
                 logging.info(f'Статус домашней работы изменился')
                 send_message(bot, message)
             else:
                 logging.info('Изменений нет')
-        except exceptions.EmptyValuesFromAPI as error:
-            logging.info('Ошибка: {error}')
+        except exceptions.EmptyValuesFromAPI:
+            logging.info('Пустой ответ от API')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logging.error(message)
@@ -169,7 +169,7 @@ def main():
             }
             if current_report != prev_report:
                 send_message(bot, message)
-                prev_error_report = current_report.copy()
+                prev_report = current_report.copy()
             current_timestamp = response.get('current_date')
             time.sleep(RETRY_TIME)
         finally:
@@ -179,9 +179,10 @@ def main():
 if __name__ == '__main__':
     logging.basicConfig(
         level=logging.INFO,
-        format=('%(asctime)s - %(name)s - %(filename)s'
-            ' - %(funcName)s[%(lineno)d] - %(levelname)s'
-            ' - %(message)s'),
+        format=('%(asctime)s - %(name)s - %(filename)s '
+            '- %(funcName)s[%(lineno)d] - %(levelname)s '
+            '- %(message)s'
+        ),
         handlers=[logging.StreamHandler(stream=sys.stdout),
                   logging.FileHandler(filename=__file__ + '.log')]
     )
