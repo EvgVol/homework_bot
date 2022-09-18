@@ -72,8 +72,9 @@ def get_api_answer(current_timestamp):
             'Произошёл сбой сети: {error}, '
             'url={url}'
             'headers={headers}, '
-            'params={params}'
-                .format(error=error, **api_with_homework)
+            'params={params}'.format(
+                error=error, **api_with_homework
+            )
         )
 
 
@@ -155,7 +156,7 @@ def main():
             if current_report != prev_report:
                 prev_report = current_report.copy()
                 message = parse_status(homeworks[0])
-                logging.info(f'Статус домашней работы изменился')
+                logging.info('Статус домашней работы изменился')
                 send_message(bot, message)
             else:
                 logging.info('Изменений нет')
@@ -179,11 +180,14 @@ def main():
 if __name__ == '__main__':
     logging.basicConfig(
         level=logging.INFO,
-        format=('%(asctime)s - %(name)s - %(filename)s '
-            '- %(funcName)s[%(lineno)d] - %(levelname)s '
-            '- %(message)s'
+        format=(
+            '%(asctime)s, %(name)s, %(filename)s, '
+            '%(funcName)s[%(lineno)d], %(levelname)s, '
+            '%(message)s'
         ),
-        handlers=[logging.StreamHandler(stream=sys.stdout),
-                  logging.FileHandler(filename=__file__ + '.log')]
+        handlers=[
+            logging.StreamHandler(stream=sys.stdout),
+            logging.FileHandler(filename=__file__ + '.log')
+        ]
     )
     main()
