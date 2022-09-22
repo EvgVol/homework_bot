@@ -34,6 +34,7 @@ STATUS_IS_CHANGED = (
 
 def send_message(bot, message):
     """Функция отправляет сообщение в Telegram чат."""
+
     try:
         logging.info('Отправляем сообщение в телеграм')
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
@@ -56,7 +57,10 @@ def get_api_answer(current_timestamp):
         'params': {'from_date': timestamp}
     }
     try:
-        logging.info('Делаем запрос к API')
+        logging.info(
+            'Делаем запрос к {url} с параметрами: {params}'
+                .format(**api_with_homework)
+            )
         response = requests.get(**api_with_homework)
         logging.info('Ответ от сервера получен успешно')
         if response.status_code != HTTPStatus.OK:
@@ -80,11 +84,10 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Функция проверяет ответ API на корректность."""
-    homeworks_list = response['homeworks']
     logging.info('Список домашних работ успешно получен')
     if not isinstance(response, dict):
         raise TypeError('Ответ API отличен от словаря')
-    if homeworks_list is None:
+    if response['homeworks'] is None:
         raise exceptions.EmptyValuesFromAPI(
             'Пустой ответ от API'
         )
@@ -133,7 +136,6 @@ def check_tokens():
             logging.critical('Отсутствует токен переменной {name}')
     return flag
 
-
 def main():
     """Описание основной логики работы бота."""
     if not check_tokens():
@@ -144,40 +146,43 @@ def main():
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
+    current_report = {}
     prev_report = {}
 
     while True:
         try:
-            if not isinstance(current_timestamp, int):
-                raise SystemError('В функцию передана не дата')
             response = get_api_answer(current_timestamp)
             homeworks = check_response(response)
-            current_report = homeworks[0].get('status')
-            if current_report != prev_report:
-                prev_report = current_report.copy()
+            if homeworks:
                 message = parse_status(homeworks[0])
+                homework_name = response.get("homework_name")
+                homework_status = response.get("status")
+                current_report[homework_name] = homework_status
+            else:
+                logging.info('Нет новых статусов')
+            if current_report != prev_report:
                 logging.info('Статус домашней работы изменился')
                 send_message(bot, message)
+                prev_report = current_report.copy()
+                current_report[homework_name] = homework_status
             else:
                 logging.info('Изменений нет')
-        except exceptions.EmptyValuesFromAPI:
-            logging.info('Пустой ответ от API')
+            current_timestamp = response.get("current_date")
+
+        except exceptions.EmptyValuesFromAPI as error:
+            logging.info('Пустой ответ от API. Ошибка: {error}')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logging.error(message)
-            # current_report = {
-            #     error.__class__.__name__: str(error)
-            # }
             if current_report != prev_report:
                 send_message(bot, message)
                 prev_report = current_report.copy()
-            current_timestamp = response.get('current_date')
-            time.sleep(RETRY_TIME)
         finally:
             time.sleep(RETRY_TIME)
 
 
 if __name__ == '__main__':
+    
     logging.basicConfig(
         level=logging.INFO,
         format=(
