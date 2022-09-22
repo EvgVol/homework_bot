@@ -57,8 +57,9 @@ def get_api_answer(current_timestamp):
     }
     try:
         logging.info(
-            'Делаем запрос к {url} с параметрами: {params}'
-                .format(**api_with_homework)
+            'Делаем запрос к {url} с параметрами: {params}'.format(
+                **api_with_homework
+            )
         )
         response = requests.get(**api_with_homework)
         logging.info('Ответ от сервера получен успешно')
