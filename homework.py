@@ -34,7 +34,6 @@ STATUS_IS_CHANGED = (
 
 def send_message(bot, message):
     """Функция отправляет сообщение в Telegram чат."""
-
     try:
         logging.info('Отправляем сообщение в телеграм')
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
@@ -58,9 +57,8 @@ def get_api_answer(current_timestamp):
     }
     try:
         logging.info(
-            'Делаем запрос к {url} с параметрами: {params}'
-                .format(**api_with_homework)
-            )
+            'Делаем запрос к {url} с параметрами: {params}'.format(**api_with_homework)
+        )
         response = requests.get(**api_with_homework)
         logging.info('Ответ от сервера получен успешно')
         if response.status_code != HTTPStatus.OK:
@@ -136,6 +134,7 @@ def check_tokens():
             logging.critical('Отсутствует токен переменной {name}')
     return flag
 
+
 def main():
     """Описание основной логики работы бота."""
     if not check_tokens():
@@ -170,7 +169,7 @@ def main():
             current_timestamp = response.get("current_date")
 
         except exceptions.EmptyValuesFromAPI as error:
-            logging.info('Пустой ответ от API. Ошибка: {error}')
+            logging.info(f'Пустой ответ от API. Ошибка: {error}')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logging.error(message)
@@ -182,7 +181,6 @@ def main():
 
 
 if __name__ == '__main__':
-    
     logging.basicConfig(
         level=logging.INFO,
         format=(
