@@ -42,9 +42,12 @@ def send_message(bot, message):
         logging.info(
             f'Пользователю @{user_username} отправлено сообщение: {message}'
         )
+        return True
+
     except telegram.error.TelegramError as error:
         logging.error(f'Сообщение: {message} не удалось отправить')
         logging.error(f'Ошибка: {error}')
+        return False
 
 
 def get_api_answer(current_timestamp):
@@ -87,7 +90,7 @@ def check_response(response):
     logging.info('Список домашних работ успешно получен')
     if not isinstance(response, dict):
         raise TypeError('Ответ API отличен от словаря')
-    if response['homeworks'] is None:
+    if 'homeworks' not in response:
         raise exceptions.EmptyValuesFromAPI(
             'Пустой ответ от API'
         )
@@ -156,27 +159,25 @@ def main():
             homeworks = check_response(response)
             if homeworks:
                 message = parse_status(homeworks[0])
-                homework_name = response.get("homework_name")
                 homework_status = response.get("status")
-                current_report[homework_name] = homework_status
+                current_report['message'] = homework_status
             else:
-                logging.info('Нет новых статусов')
+                current_report['message'] = 'Нет новых статусов'
             if current_report != prev_report:
                 logging.info('Статус домашней работы изменился')
-                send_message(bot, message)
-                prev_report = current_report.copy()
-                current_report[homework_name] = homework_status
+                if send_message(bot, message):
+                    prev_report = current_report.copy()
+                    current_timestamp = response.get("current_date", current_timestamp)
             else:
                 logging.info('Изменений нет')
-            current_timestamp = response.get("current_date")
 
         except exceptions.EmptyValuesFromAPI as error:
             logging.info(f'Пустой ответ от API. Ошибка: {error}')
         except Exception as error:
-            message = f'Сбой в работе программы: {error}'
-            logging.error(message)
+            current_report['message'] = f'Сбой в работе программы: {error}'
+            logging.error(f'Сбой в работе программы: {error}')
             if current_report != prev_report:
-                send_message(bot, message)
+                send_message(bot, f'Сбой в работе программы: {error}')
                 prev_report = current_report.copy()
         finally:
             time.sleep(RETRY_TIME)
