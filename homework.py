@@ -167,7 +167,10 @@ def main():
                 logging.info('Статус домашней работы изменился')
                 if send_message(bot, message):
                     prev_report = current_report.copy()
-                    current_timestamp = response.get("current_date", current_timestamp)
+                    current_timestamp = response.get(
+                        "current_date",
+                        current_timestamp
+                    )
             else:
                 logging.info('Изменений нет')
 
