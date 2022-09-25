@@ -159,13 +159,12 @@ def main():
             homeworks = check_response(response)
             if homeworks:
                 message = parse_status(homeworks[0])
-                homework_status = response.get("status")
-                current_report['message'] = homework_status
+                current_report['message'] = message
             else:
                 current_report['message'] = 'Нет новых статусов'
             if current_report != prev_report:
                 logging.info('Статус домашней работы изменился')
-                if send_message(bot, message):
+                if send_message(bot, current_report['message']):
                     prev_report = current_report.copy()
                     current_timestamp = response.get(
                         "current_date",
